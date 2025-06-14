@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hacked By INDIAN_EAGLE - Indian Cyber Force</title>
+    <link rel="icon" href="https://files.catbox.moe/zbd2tt.png" type="image/x-icon" />
+    <link rel="shortcut icon" href="https://files.catbox.moe/zbd2tt.png" type="image/x-icon" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Hind:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            color: #ddd;
+            font-family: 'Hind', sans-serif;
+            text-align: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 45, 0, 0.2) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 0, 45, 0.2) 0%, transparent 20%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 80, 0, 0.05) 25%, rgba(0, 80, 0, 0.05) 26%, transparent 27%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 80, 0, 0.05) 25%, rgba(0, 80, 0, 0.05) 26%, transparent 27%, transparent);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+        
+        .header {
+            padding: 20px 0;
+        }
+        
+        .logo {
+            width: 300px;
+            height: 300px;
+            border: 3px solid #ff9933;
+            border-radius: 50%;
+            background: url('https://files.catbox.moe/zbd2tt.png') center/contain no-repeat;
+            margin: 0 auto;
+            box-shadow: 0 0 25px rgba(255, 153, 51, 0.5);
+            animation: pulse 3s infinite;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff9933, 0 0 20px #ff9933;
+            background: linear-gradient(to right, #ff9933, #ffffff, #138808);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s infinite alternate;
+        }
+        
+        .message {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+            border: 1px solid #ff9933;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 20px rgba(255, 153, 51, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .message::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff9933, #ffffff, #138808);
+        }
+        
+        .message p {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .highlight {
+            color: #ff9933;
+            font-weight: bold;
+        }
+        
+        .tricolor {
+            background: linear-gradient(to right, #ff9933, #ffffff, #138808);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        
+        .signature {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin: 30px 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 153, 51, 0.8);
+            animation: flicker 1.5s infinite alternate;
+        }
+        
+        .warning {
+            font-size: 1.8rem;
+            color: #ff3333;
+            margin: 25px 0;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.7);
+            animation: blink 1.5s infinite;
+        }
+        
+        .footer {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 40px 0;
+            padding: 15px;
+        }
+        
+        .we {
+            color: #ff9933;
+        }
+        
+        .are {
+            color: #fff;
+        }
+        
+        .legion {
+            color: #138808;
+        }
+        
+        .terminal {
+            max-width: 700px;
+            margin: 20px auto;
+            background-color: rgba(0, 20, 0, 0.8);
+            border: 1px solid #138808;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #0f0;
+            box-shadow: 0 0 15px rgba(19, 136, 8, 0.5);
+            overflow: hidden;
+        }
+        
+        .terminal::before {
+            content: "root@indian-cyber-force:~$ ";
+            color: #ff9933;
+        }
+        
+        .terminal-text {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 15s steps(60, end) infinite;
+        }
+        
+        @keyframes typing {
+            0% { width: 0; }
+            50% { width: 100%; }
+            100% { width: 100%; }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 15px rgba(255, 153, 51, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 153, 51, 0.8); }
+            100% { box-shadow: 0 0 15px rgba(255, 153, 51, 0.5); }
+        }
+        
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px #ff9933; }
+            100% { text-shadow: 0 0 20px #ff9933, 0 0 30px #ff9933; }
+        }
+        
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                opacity: 0.6;
+            }
+        }
+        
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.7; }
+        }
+        
+        .floating {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.1);
+            font-size: 1rem;
+            user-select: none;
+            z-index: -1;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                width: 200px;
+                height: 200px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .message p {
+                font-size: 1.1rem;
+            }
+            
+            .signature {
+                font-size: 1.8rem;
+            }
+            
+            .warning {
+                font-size: 1.4rem;
+            }
+            
+            .footer {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating text elements -->
+    <div class="floating" style="top: 10%; left: 5%">INDIAN_CYBER_FORCE</div>
+    <div class="floating" style="top: 15%; right: 10%">WE ARE LEGION</div>
+    <div class="floating" style="top: 30%; left: 8%">#OPBHARAT</div>
+    <div class="floating" style="bottom: 20%; right: 5%">EXPECT US</div>
+    <div class="floating" style="bottom: 30%; left: 15%">JAI HIND</div>
+    
+    <div class="header">
+        <div class="logo"></div>
+        <h1>Indian Cyber Force</h1>
+    </div>
+    
+    <div class="message">
+        <p><span class="highlight"></span></p>
+        <p>lol</p>
+        <p><span class="tricolor">Indian Cyber Force</span> - <span class="highlight">Cyber Warriors</span> - <span class="tricolor">Digital Patriots</span> - <span class="highlight">All Indian Hackers</span></p>
+        <br>
+        <p>[ Greetz: <span class="tricolor">All Anonymous Hackers Worldwide</span> ]</p>
+    </div>
+    
+    <div class="terminal">
+        <div class="terminal-text">Long live India!</div>
+    </div>
+    
+    <p class="signature">Defaced by ./INDIAN_EAGLE</p>
+    
+    <p class="warning">Dare to touch Indian cyberspace and face the consequences!</p>
+    <p class="warning">You Will Know Why We Hacked - #OperationBharat</p>
+    
+    <div class="footer">
+        <span class="we">We</span> 
+        <span class="are">Are</span> 
+        <span class="legion">Legion</span>
+    </div>
+    
+    <script>
+        // Create more floating text elements dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            const texts = [
+                "INDIAN_CYBER_FORCE", "WE ARE LEGION", "#OPBHARAT", 
+                "EXPECT US", "JAI HIND", "VANDE MATARAM", "CYBER ARMY",
+                "BHARAT MATA KI JAI", "DIGITAL SOLDIERS", "PROUD INDIAN"
+            ];
+            
+            const colors = ["rgba(255, 153, 51, 0.1)", "rgba(255, 255, 255, 0.1)", "rgba(19, 136, 8, 0.1)"];
+            
+            for (let i = 0; i < 20; i++) {
+                const textEl = document.createElement('div');
+                textEl.className = 'floating';
+                textEl.textContent = texts[Math.floor(Math.random() * texts.length)];
+                textEl.style.top = `${Math.random() * 100}%`;
+                textEl.style.left = `${Math.random() * 100}%`;
+                textEl.style.fontSize = `${0.8 + Math.random() * 1.2}rem`;
+                textEl.style.color = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(textEl);
+            }
+            
+            // Add floating animation
+            const floaters = document.querySelectorAll('.floating');
+            floaters.forEach(floater => {
+                // Random movement direction and speed
+                let x = (Math.random() - 0.5) * 0.5;
+                let y = (Math.random() - 0.5) * 0.5;
+                
+                function animate() {
+                    const rect = floater.getBoundingClientRect();
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    // Reverse direction if hitting the edge
+                    if (rect.left <= 0 || rect.right >= viewportWidth) x = -x;
+                    if (rect.top <= 0 || rect.bottom >= viewportHeight) y = -y;
+                    
+                    const left = parseFloat(floater.style.left || '0') + x;
+                    const top = parseFloat(floater.style.top || '0') + y;
+                    
+                    floater.style.left = `${left}%`;
+                    floater.style.top = `${top}%`;
+                    
+                    requestAnimationFrame(animate);
+                }
+                
+                animate();
+            });
+        });
+    </script>
+</body>
+</html>
